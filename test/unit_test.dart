@@ -8,7 +8,8 @@ void main() {
       name: 'Charlie',
       breed: 'German Shepherd',
       image: 'images/dog3.png',
-      age: " 2.5",
+      age: 2,
+      price: '\$3',
       origin: "India",
       color: const Color(0xffB1D1FF),
       description:

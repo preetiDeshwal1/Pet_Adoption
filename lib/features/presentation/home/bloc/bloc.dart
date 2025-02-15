@@ -1,22 +1,126 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:petadoption/features/presentation/home/bloc/event.dart';
-import 'package:petadoption/features/presentation/home/bloc/state.dart';
+import '../../../model/pet_model.dart';
+import 'event.dart';
+import 'state.dart';
 
-class PetBloc extends Bloc<PetEvent, PetState> {
-  PetBloc() : super(PetState(_pets)) {
-    on<LoadPets>((event, emit) => emit(PetState(_pets)));
+class PetsBloc extends Bloc<PetsEvent, PetsState> {
+  List<PetsModel> allPets = [];
+  int selectedIndex = 0;
+  int page = 1;
+  bool isLoading = false;
+  String searchQuery = "";
+  int minAge = 0;
+
+  PetsBloc() : super(PetsLoading()) {
+    on<LoadPets>((event, emit) {
+      emit(PetsLoading());
+      allPets = selectedIndex == 0 ? cats : dogs;
+      List<PetsModel> pets = allPets.toList();
+      emit(PetsLoaded(
+          pets: pets,
+          // hasMore: allPets.length > 5,
+          selectedIndex: selectedIndex));
+    });
+
+    on<SearchPets>((event, emit) {
+      searchQuery = event.query.toLowerCase();
+      List<PetsModel> filteredPets = (minAge == 0)
+          ? allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .toList()
+          : allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .where((pet) => pet.age == minAge)
+              // .take(5)
+              .toList();
+
+      emit(PetsLoaded(
+          pets: filteredPets,
+          // hasMore: allPets.length > 5,
+          selectedIndex: selectedIndex));
+    });
+
+    on<FilterPetsByAge>((event, emit) {
+      minAge = event.minAge;
+      List<PetsModel> filteredPets = (minAge == 0)
+          ? allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .toList()
+          : allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .where((pet) => pet.age == minAge)
+              // .take(5)
+              .toList();
+
+      emit(PetsLoaded(
+          pets: filteredPets,
+          // hasMore: allPets.length > 5,
+          selectedIndex: selectedIndex));
+    });
+
+    on<SlectPetIndexEvent>((event, emit) {
+      selectedIndex = event.index;
+      // List<PetsModel> filteredPets = (minAge == 0)
+      //     ? allPets
+      //         .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+      //         .toList()
+      //     : allPets
+      //         .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+      //         .where((pet) => pet.age == minAge)
+      //         // .take(5)
+      //         .toList();
+
+      // emit(PetsLoaded(
+      //     pets: filteredPets,
+      //     // hasMore: allPets.length > 5,
+      //     selectedIndex: selectedIndex));
+      add(ChangeCategory(selectedIndex));
+    });
+
+    on<ChangeCategory>((event, emit) {
+      selectedIndex = event.index;
+      allPets = selectedIndex == 0 ? cats : dogs;
+      page = 1;
+      List<PetsModel> filteredPets = (minAge == 0)
+          ? allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .toList()
+          : allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .where((pet) => pet.age == minAge)
+              // .take(5)
+              .toList();
+
+      emit(PetsLoaded(
+          pets: filteredPets,
+          // hasMore: allPets.length > 5,
+          selectedIndex: selectedIndex));
+    });
+
+    on<LoadMorePets>((event, emit) {
+      if (isLoading) return;
+      isLoading = true;
+      Future.delayed(const Duration(seconds: 1));
+      List<PetsModel> newPets = (minAge == 0)
+          ? allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .toList()
+          : allPets
+              .where((pet) => pet.name.toLowerCase().contains(searchQuery))
+              .where((pet) => pet.age == minAge)
+              // .take(5)
+              .toList();
+
+      page++;
+      isLoading = false;
+
+      if (state is PetsLoaded) {
+        final currentState = state as PetsLoaded;
+        emit(PetsLoaded(
+            pets: [...currentState.pets, ...newPets],
+            // hasMore: newPets.isNotEmpty,
+            selectedIndex: selectedIndex));
+      }
+    });
   }
-
-  static final List<Map<String, dynamic>> _pets = [
-    {'name': 'Bella', 'age': 2, 'price': 150, 'image': 'assets/cat1.jpeg'},
-    {'name': 'Max', 'age': 3, 'price': 200, 'image': 'assets/dog1.jpeg'},
-    {'name': 'Charlie', 'age': 1, 'price': 180, 'image': 'assets/cat2.jpeg'},
-    {'name': 'Lucy', 'age': 4, 'price': 250, 'image': 'assets/dog2.jpeg'},
-    {'name': 'Milo', 'age': 2, 'price': 175, 'image': 'assets/cat3.jpeg'},
-    {'name': 'Rocky', 'age': 3, 'price': 220, 'image': 'assets/dog3.jpeg'},
-    {'name': 'Luna', 'age': 5, 'price': 300, 'image': 'assets/cat4.jpeg'},
-    {'name': 'Daisy', 'age': 1, 'price': 190, 'image': 'assets/dog4.jpeg'},
-    {'name': 'Coco', 'age': 2, 'price': 210, 'image': 'assets/cat5.jpeg'},
-    {'name': 'Buddy', 'age': 3, 'price': 240, 'image': 'assets/dog5.jpeg'},
-  ];
 }

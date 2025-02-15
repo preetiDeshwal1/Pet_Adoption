@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../shared/theme_bloc/bloc.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -6,7 +9,14 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read<ThemeBloc>().add(ToggleTheme());
+        },
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.brightness_6, color: Colors.white),
+      ),
       body: Stack(
         children: [
           // Custom Painted Background
@@ -74,7 +84,7 @@ class SettingsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      // color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
@@ -145,7 +155,9 @@ class SettingsScreen extends StatelessWidget {
     return TextField(
       decoration: InputDecoration(
         labelText: title,
-        prefixIcon: Icon(icon, color: Colors.blueAccent),
+        prefixIcon: Icon(
+          icon,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.blueAccent),
@@ -155,7 +167,7 @@ class SettingsScreen extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
         ),
         filled: true,
-        fillColor: Colors.grey[200],
+        // fillColor: Colors.grey[200],
       ),
       controller: TextEditingController(text: value),
     );
